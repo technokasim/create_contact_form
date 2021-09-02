@@ -1,0 +1,84 @@
+#install crispy and add inside setting
+
+
+INSTALLED_APPS = [
+    'crispy_forms'
+]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+#inside app/models.py
+
+from django.db import models
+
+
+class Contact(models.Model):
+    name = models.CharField(max_length=255)
+    email = models.EmailField()
+    mobile = models.CharField(max_length=255)
+    message = models.TextField()
+
+    def __str__(self):
+        return self.name
+        
+#inside app/forms.py
+        
+from django.forms import ModelForm
+from .models import Contact
+
+
+class ContactForm(ModelForm):
+    class Meta:
+        model = Contact
+        fields = '__all__'
+        
+#inside app/views.py   
+
+ from .forms import ContactForm   
+ 
+ def home(request):
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return render(request, 'home.html')
+    form = ContactForm()
+    context = {'form': form}
+    return render(request, 'home.html', context)       
+        
+        
+#inside app/urls.py
+
+from .views import *
+
+
+urlpatterns = [
+    path('' , home , name="home"),
+]
+      
+      
+ #inside app/admin.py     
+
+from .models import Contact
+
+admin.site.register(Contact)
+
+
+
+
+inside template/home.html
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block start %}
+
+  <form action="" method="post">
+                      {% csrf_token %}
+                      {{ form|crispy }}
+                      <input type="submit" class="btn btn-primary mt-2" value="Submit">
+  </form>
+  
+  
+  {% endblock %}
+
+      
